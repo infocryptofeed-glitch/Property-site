@@ -1,4 +1,3 @@
-
 import { supabaseConfig } from "./supabase-config.js";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -392,16 +391,34 @@ async function fetchNotifications() {
   document.getElementById("notifDot").style.display = unread > 0 ? "inline-block" : "none";
 
   const list = document.getElementById("notifList");
-  list.innerHTML = items.map(n => `
-    <div class="notif-item ${n.read ? "" : "unread"}" data-id="${n.id}">
-      ${escapeHtml(n.message || "")}
-    </div>`).join("") || `<p class="helper">No notifications yet.</p>`;
+  list.innerHTML = (items.length ? `<button class="btn" id="clearAllNotifs" style="margin-bottom:12px;">Clear all</button>` : "") +
+    (items.map(n => `
+    <div class="notif-item ${n.read ? "" : "unread"}" data-id="${n.id}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+      <span class="notif-text" style="flex:1;cursor:pointer;">${escapeHtml(n.message || "")}</span>
+      <button class="notif-remove" data-id="${n.id}" title="Remove" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;">✕</button>
+    </div>`).join("") || `<p class="helper">No notifications yet.</p>`);
 
-  list.querySelectorAll(".notif-item").forEach(el => {
+  list.querySelectorAll(".notif-text").forEach(el => {
     el.addEventListener("click", async () => {
-      await supabase.from("notifications").update({ read: true }).eq("id", el.dataset.id);
+      await supabase.from("notifications").update({ read: true }).eq("id", el.closest(".notif-item").dataset.id);
     });
   });
+  list.querySelectorAll(".notif-remove").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const { error } = await supabase.from("notifications").delete().eq("id", btn.dataset.id);
+      if (error) showToast("Could not remove notification: " + error.message);
+    });
+  });
+  const clearBtn = document.getElementById("clearAllNotifs");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", async () => {
+      if (!confirm("Remove all notifications?")) return;
+      const ids = items.map(n => n.id);
+      const { error } = await supabase.from("notifications").delete().in("id", ids);
+      if (error) showToast("Could not clear notifications: " + error.message);
+    });
+  }
 }
 
 // ---------------- SITE SETTINGS ----------------

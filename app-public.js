@@ -1,3 +1,4 @@
+
 import { supabaseConfig } from "./supabase-config.js";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -49,6 +50,7 @@ async function loadSiteSettings() {
 
   document.getElementById("heroTitle").textContent = s.banner_title || "Find your next property";
   document.getElementById("heroSubtitle").textContent = s.banner_subtitle || "Browse verified listings, straight from the dealer.";
+  document.getElementById("footerSiteName").textContent = s.site_name || "This site";
   document.getElementById("contactLine").textContent = s.contact_phone
     ? `Call or WhatsApp: ${s.contact_phone}${s.contact_email ? " · " + s.contact_email : ""}`
     : "Contact the dealer for more details.";
@@ -60,6 +62,7 @@ async function loadSiteSettings() {
     const url = socials[key];
     const a = document.createElement("a");
     a.className = "social-icon" + (url ? " active" : "");
+    a.dataset.key = key;
     a.innerHTML = SOCIAL_ICONS[key];
     a.title = key.charAt(0).toUpperCase() + key.slice(1);
     if (url) { a.href = url; a.target = "_blank"; a.rel = "noopener"; }
@@ -346,6 +349,8 @@ function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
 }
 function escapeAttr(str) { return escapeHtml(str); }
+
+document.getElementById("copyrightYear").textContent = new Date().getFullYear();
 
 loadSiteSettings();
 loadAdminProfile();

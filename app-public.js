@@ -37,7 +37,16 @@ async function loadSiteSettings() {
   const { data } = await supabase.from("site_settings").select("*").eq("id", "main").maybeSingle();
   const s = data || {};
   document.getElementById("siteName").textContent = s.site_name || "Your Property Brand";
-  document.getElementById("brandMark").textContent = (s.site_name || "P").charAt(0).toUpperCase();
+
+  const brandMark = document.getElementById("brandMark");
+  if (s.logo_url) {
+    brandMark.innerHTML = `<img src="${s.logo_url}" alt="logo">`;
+  } else {
+    brandMark.textContent = (s.site_name || "P").charAt(0).toUpperCase();
+  }
+
+  applyThemeColors(s.theme_colors);
+
   document.getElementById("heroTitle").textContent = s.banner_title || "Find your next property";
   document.getElementById("heroSubtitle").textContent = s.banner_subtitle || "Browse verified listings, straight from the dealer.";
   document.getElementById("contactLine").textContent = s.contact_phone
@@ -57,6 +66,16 @@ async function loadSiteSettings() {
     else { a.href = "javascript:void(0)"; }
     socialRow.appendChild(a);
   });
+}
+
+function applyThemeColors(colors) {
+  if (!colors) return;
+  const root = document.documentElement.style;
+  if (colors.accent) root.setProperty("--brass", colors.accent);
+  if (colors.accentHi) root.setProperty("--brass-hi", colors.accentHi);
+  if (colors.background) root.setProperty("--ink-950", colors.background);
+  if (colors.card) { root.setProperty("--ink-800", colors.card); root.setProperty("--ink-900", colors.card); }
+  if (colors.text) root.setProperty("--text-hi", colors.text);
 }
 
 // ---------- Admin profile badge ----------
@@ -172,8 +191,15 @@ function openListing(listing) {
   const photos = (listing.media && listing.media.photos) || [];
   const videos = (listing.media && listing.media.videos) || [];
   const galleryItems = [
-    ...photos.map(url => `<img src="${url}">`),
-    ...videos.map(url => `<video src="${url}" controls></video>`)
+    ...photos.map(url => `
+      <div class="gallery-item" data-type="image" data-url="${escapeAttr(url)}">
+        <img src="${url}" loading="lazy">
+      </div>`),
+    ...videos.map(url => `
+      <div class="gallery-item" data-type="video" data-url="${escapeAttr(url)}">
+        ${videoThumbHtml(url)}
+        <div class="play-badge"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7Z"/></svg></div>
+      </div>`)
   ].join("");
 
   const fieldsHtml = (listing.custom_fields || []).map(f => `
@@ -208,6 +234,10 @@ function openListing(listing) {
   backdrop.style.display = "flex";
   document.getElementById("closeModal").onclick = () => backdrop.style.display = "none";
   backdrop.onclick = (e) => { if (e.target === backdrop) backdrop.style.display = "none"; };
+
+  content.querySelectorAll(".gallery-item").forEach(el => {
+    el.addEventListener("click", () => openLightbox(el.dataset.url, el.dataset.type));
+  });
 
   const shareUrl = `${window.location.origin}${window.location.pathname}?listing=${listing.id}`;
   document.getElementById("shareBtn").onclick = async () => {
@@ -263,6 +293,45 @@ async function submitOffer(listingId) {
   loadOffers(listingId);
 }
 
+// ---------- Video helpers (YouTube/Vimeo links vs direct video files) ----------
+function getYouTubeId(url) {
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+  return m ? m[1] : null;
+}
+function getVimeoId(url) {
+  const m = url.match(/vimeo\.com\/(\d+)/);
+  return m ? m[1] : null;
+}
+function embedHtml(url) {
+  const yt = getYouTubeId(url);
+  if (yt) return `<iframe src="https://www.youtube.com/embed/${yt}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  const vm = getVimeoId(url);
+  if (vm) return `<iframe src="https://player.vimeo.com/video/${vm}" allow="autoplay" allowfullscreen></iframe>`;
+  return `<video src="${url}" controls autoplay></video>`;
+}
+function videoThumbHtml(url) {
+  const yt = getYouTubeId(url);
+  if (yt) return `<img src="https://img.youtube.com/vi/${yt}/hqdefault.jpg">`;
+  // Direct file: show a muted, non-controlled preview frame
+  return `<video src="${url}" muted></video>`;
+}
+
+// ---------- Lightbox ----------
+function openLightbox(url, type) {
+  const lb = document.getElementById("lightbox");
+  const content = document.getElementById("lightboxContent");
+  content.innerHTML = type === "video" ? embedHtml(url) : `<img src="${url}">`;
+  lb.style.display = "flex";
+}
+function closeLightbox() {
+  document.getElementById("lightboxContent").innerHTML = "";
+  document.getElementById("lightbox").style.display = "none";
+}
+document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
+document.getElementById("lightbox").addEventListener("click", (e) => {
+  if (e.target.id === "lightbox") closeLightbox();
+});
+
 function showToast(msg) {
   const host = document.getElementById("toastHost");
   const t = document.createElement("div");
@@ -276,6 +345,7 @@ function escapeHtml(str) {
   if (!str) return "";
   return String(str).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
 }
+function escapeAttr(str) { return escapeHtml(str); }
 
 loadSiteSettings();
 loadAdminProfile();

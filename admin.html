@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <h1 class="display">Admin Login</h1>
+    <p>Sign in to manage your listings.</p>
+    <div class="form-group"><label>Email</label><input type="email" id="loginEmail"></div>
+    <div class="form-group"><label>Password</label><input type="password" id="loginPassword"></div>
+    <button class="btn primary" id="loginBtn" style="width:100%;">Log in</button>
+    <p id="loginError" style="color:#E0665A;font-size:13px;margin-top:10px;"></p>
+  </div>
+</div>
+
+<!-- ADMIN SHELL -->
+<div class="admin-shell" id="adminShell" style="display:none;">
+  <aside class="sidebar">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <h2 class="display" style="margin:0;">Admin</h2>
+      <button class="theme-toggle" id="themeToggle" title="Toggle dark/light" aria-label="Toggle dark/light"></button>
+    </div>
+    <div class="side-link active" data-panel="panelListings">Listings</div>
+    <div class="side-link" data-panel="panelAdd">Add Listing</div>
+    <div class="side-link" data-panel="panelNotifications">Notifications <span id="notifDot" style="display:none;" class="notif-dot"></span></div>
+    <div class="side-link" data-panel="panelSite">Site Banner</div>
+    <div class="side-link" data-panel="panelProfile">Profile</div>
+    <div class="side-link" id="logoutBtn" style="margin-top:20px;color:#E0665A;">Log out</div>
+  </aside>
+
+  <main class="main">
+
+    <!-- LISTINGS -->
+    <section class="panel active" id="panelListings">
+      <h2 class="display" style="font-size:24px;margin-bottom:16px;">Your Listings</h2>
+      <div id="listingsList"></div>
+    </section>
+
+    <!-- ADD LISTING -->
+    <section class="panel" id="panelAdd">
+      <h2 class="display" style="font-size:24px;margin-bottom:16px;" id="formHeading">Add Listing</h2>
+      <div class="form-card">
+        <div class="form-group">
+          <label>Listing title / banner text</label>
+          <input type="text" id="listingTitle" placeholder="e.g. 5 Marla House in Model Town">
+          <div class="helper">This is the headline visitors see on the card and listing page.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Category</label>
+          <input type="text" id="listingCategory" list="categoryOptions" placeholder="Type or pick: House, Plot, Shop, Hostel, For Rent...">
+          <datalist id="categoryOptions"></datalist>
+          <div class="helper">Type a new category (it'll be created automatically) or pick from existing ones below.</div>
+          <div class="chip-row" id="categoryChips"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Price (Rs.)</label>
+          <input type="number" id="listingPrice" placeholder="e.g. 8500000">
+        </div>
+
+        <div class="form-group">
+          <label>Photos & videos — upload from device</label>
+          <input type="file" id="mediaUpload" multiple accept="image/*,video/*">
+          <div class="media-preview" id="mediaPreview"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Or add photo/video by link</label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="mediaLinkInput" placeholder="https://...">
+            <button class="btn" id="addMediaLink">Add</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Voice note</label>
+          <button class="rec-btn" id="recBtn"><span class="rec-dot" style="display:none;" id="recDot"></span><span id="recLabel">Record voice note</span></button>
+          <audio id="voicePreview" controls style="display:none;margin-top:10px;width:100%;"></audio>
+          <div class="voice-actions">
+            <button class="btn" id="removeVoiceBtn" type="button" style="display:none;">Remove voice note</button>
+          </div>
+          <div class="helper">You can re-record anytime by clicking the button again — it replaces the previous one.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Custom details (add as many as you need)</label>
+          <div id="optionsWrap"></div>
+          <button class="btn" id="addOptionBtn" type="button">+ Add option</button>
+        </div>
+
+        <button class="btn primary" id="publishBtn" style="margin-top:10px;">Publish Listing</button>
+        <span id="editingIdNote" style="display:none;color:#97A2BE;font-size:12px;margin-left:10px;"></span>
+      </div>
+    </section>
+
+    <!-- NOTIFICATIONS -->
+    <section class="panel" id="panelNotifications">
+      <h2 class="display" style="font-size:24px;margin-bottom:16px;">Notifications</h2>
+      <div id="notifList"></div>
+    </section>
+
+    <!-- SITE BANNER -->
+    <section class="panel" id="panelSite">
+      <h2 class="display" style="font-size:24px;margin-bottom:16px;">Site Banner & Contact</h2>
+      <div class="form-card">
+        <div class="form-group"><label>Site name</label><input type="text" id="siteNameInput"></div>
+        <div class="form-group"><label>Banner headline</label><input type="text" id="bannerTitleInput"></div>
+        <div class="form-group"><label>Banner subheading</label><input type="text" id="bannerSubtitleInput"></div>
+        <div class="form-group"><label>Contact phone / WhatsApp</label><input type="text" id="contactPhoneInput"></div>
+        <div class="form-group"><label>Contact email</label><input type="text" id="contactEmailInput"></div>
+        <div class="form-group"><label>Facebook link</label><input type="text" id="facebookInput"></div>
+        <div class="form-group"><label>Instagram link</label><input type="text" id="instagramInput"></div>
+        <div class="form-group"><label>TikTok link</label><input type="text" id="tiktokInput"></div>
+        <div class="form-group"><label>WhatsApp link</label><input type="text" id="whatsappInput"></div>
+        <button class="btn primary" id="saveSiteBtn">Save site settings</button>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="panel" id="panelProfile">
+      <h2 class="display" style="font-size:24px;margin-bottom:16px;">Your Profile (shown as trust badge)</h2>
+      <div class="form-card">
+        <div class="form-group"><label>Profile photo</label><input type="file" id="profilePhotoInput" accept="image/*"></div>
+        <div class="form-group"><label>Name</label><input type="text" id="profileNameInput"></div>
+        <div class="form-group"><label>Short bio</label><textarea id="profileBioInput" rows="3"></textarea></div>
+        <div class="form-group"><label>Phone (for WhatsApp badge link)</label><input type="text" id="profilePhoneInput"></div>
+        <button class="btn primary" id="saveProfileBtn">Save profile</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div id="toastHost"></div>
+
+<script type="module" src="app-admin.js"></script>
+</body>
+</html>

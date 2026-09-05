@@ -71,7 +71,7 @@ a { color: inherit; }
 
 .topbar {
   position: sticky; top: 0; z-index: 40;
-  background: rgba(7,11,20,0.85);
+  background: color-mix(in srgb, var(--ink-950) 88%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
@@ -98,8 +98,12 @@ a { color: inherit; }
   pointer-events: none;
 }
 .social-icon svg { width: 16px; height: 16px; fill: currentColor; }
-.social-icon.active { opacity: 1; pointer-events: auto; cursor: pointer; }
-.social-icon.active:hover { border-color: var(--brass); color: var(--brass-hi); transform: translateY(-2px); }
+.social-icon.active { opacity: 1; pointer-events: auto; cursor: pointer; color: #fff; border-color: transparent; }
+.social-icon.active:hover { transform: translateY(-2px) scale(1.06); }
+.social-icon.active[data-key="facebook"] { background: #1877F2; }
+.social-icon.active[data-key="instagram"] { background: linear-gradient(45deg, #f58529, #dd2a7b 40%, #8134af 70%, #515bd4); }
+.social-icon.active[data-key="tiktok"] { background: #010101; }
+.social-icon.active[data-key="whatsapp"] { background: #25D366; }
 
 /* ---------- Hero / banner (editable title lives here) ---------- */
 .hero {

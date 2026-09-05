@@ -33,6 +33,7 @@
     <div class="side-link" data-panel="panelAdd">Add Listing</div>
     <div class="side-link" data-panel="panelNotifications">Notifications <span id="notifDot" style="display:none;" class="notif-dot"></span></div>
     <div class="side-link" data-panel="panelSite">Site Banner</div>
+    <div class="side-link" data-panel="panelTheme">Theme Colors</div>
     <div class="side-link" data-panel="panelProfile">Profile</div>
     <div class="side-link" id="logoutBtn" style="margin-top:20px;color:#E0665A;">Log out</div>
   </aside>
@@ -113,6 +114,10 @@
     <section class="panel" id="panelSite">
       <h2 class="display" style="font-size:24px;margin-bottom:16px;">Site Banner & Contact</h2>
       <div class="form-card">
+        <div class="form-group"><label>Site logo</label><input type="file" id="siteLogoInput" accept="image/*">
+          <div class="helper">Upload your logo here — replaces the letter-circle icon on the website. Leave empty to keep using the letter.</div>
+          <div id="logoPreviewWrap" style="margin-top:8px;"><img id="logoPreviewImg" style="width:48px;height:48px;border-radius:8px;object-fit:cover;display:none;"></div>
+        </div>
         <div class="form-group"><label>Site name</label><input type="text" id="siteNameInput"></div>
         <div class="form-group"><label>Banner headline</label><input type="text" id="bannerTitleInput"></div>
         <div class="form-group"><label>Banner subheading</label><input type="text" id="bannerSubtitleInput"></div>
@@ -123,6 +128,38 @@
         <div class="form-group"><label>TikTok link</label><input type="text" id="tiktokInput"></div>
         <div class="form-group"><label>WhatsApp link</label><input type="text" id="whatsappInput"></div>
         <button class="btn primary" id="saveSiteBtn">Save site settings</button>
+      </div>
+    </section>
+
+    <!-- THEME COLORS -->
+    <section class="panel" id="panelTheme">
+      <h2 class="display" style="font-size:24px;margin-bottom:16px;">Theme Colors</h2>
+      <div class="form-card">
+        <p class="helper" style="margin-bottom:16px;">Yahan se poori website ke colors badal sakte hain — har client ke liye alag brand colors set kar sakte hain. Save karte hi website pe turant apply ho jayenge.</p>
+        <div class="form-group">
+          <label>Accent color (buttons, price, highlights)</label>
+          <input type="color" id="colorAccent" value="#C9A768">
+        </div>
+        <div class="form-group">
+          <label>Accent color — hover/lighter shade</label>
+          <input type="color" id="colorAccentHi" value="#E4C88A">
+        </div>
+        <div class="form-group">
+          <label>Background color</label>
+          <input type="color" id="colorBg" value="#070B14">
+        </div>
+        <div class="form-group">
+          <label>Card / panel background</label>
+          <input type="color" id="colorCard" value="#121A2E">
+        </div>
+        <div class="form-group">
+          <label>Main text color</label>
+          <input type="color" id="colorText" value="#EDEFF5">
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn primary" id="saveThemeBtn">Save theme colors</button>
+          <button class="btn" id="resetThemeBtn">Reset to default</button>
+        </div>
       </div>
     </section>
 

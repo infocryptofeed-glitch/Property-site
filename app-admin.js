@@ -1,3 +1,4 @@
+
 import { supabaseConfig } from "./supabase-config.js";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 

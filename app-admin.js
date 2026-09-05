@@ -407,6 +407,18 @@ async function fetchNotifications() {
 async function loadSiteSettingsForm() {
   const { data } = await supabase.from("site_settings").select("*").eq("id", "main").maybeSingle();
   if (!data) return;
+  if (data.logo_url) {
+    const img = document.getElementById("logoPreviewImg");
+    img.src = data.logo_url;
+    img.style.display = "block";
+  }
+  const c = data.theme_colors || {};
+  if (c.accent) document.getElementById("colorAccent").value = c.accent;
+  if (c.accentHi) document.getElementById("colorAccentHi").value = c.accentHi;
+  if (c.background) document.getElementById("colorBg").value = c.background;
+  if (c.card) document.getElementById("colorCard").value = c.card;
+  if (c.text) document.getElementById("colorText").value = c.text;
+
   document.getElementById("siteNameInput").value = data.site_name || "";
   document.getElementById("bannerTitleInput").value = data.banner_title || "";
   document.getElementById("bannerSubtitleInput").value = data.banner_subtitle || "";
@@ -420,6 +432,11 @@ async function loadSiteSettingsForm() {
 
 document.getElementById("saveSiteBtn").addEventListener("click", async () => {
   try {
+    let logoUrl = null;
+    const logoFile = document.getElementById("siteLogoInput").files[0];
+    if (logoFile) {
+      logoUrl = await uploadToSupabase(logoFile, "logo", logoFile.name);
+    }
     const payload = {
       id: "main",
       site_name: document.getElementById("siteNameInput").value.trim(),
@@ -434,12 +451,56 @@ document.getElementById("saveSiteBtn").addEventListener("click", async () => {
         whatsapp: document.getElementById("whatsappInput").value.trim()
       }
     };
+    if (logoUrl) payload.logo_url = logoUrl;
     const { error } = await supabase.from("site_settings").upsert(payload);
     if (error) throw error;
+    if (logoUrl) {
+      const img = document.getElementById("logoPreviewImg");
+      img.src = logoUrl; img.style.display = "block";
+    }
     showToast("Site settings saved");
   } catch (err) {
     showToast("Could not save site settings: " + err.message);
     console.error(err);
+  }
+});
+
+// ---------------- THEME COLORS ----------------
+const DEFAULT_THEME = {
+  accent: "#C9A768", accentHi: "#E4C88A",
+  background: "#070B14", card: "#121A2E", text: "#EDEFF5"
+};
+
+document.getElementById("saveThemeBtn").addEventListener("click", async () => {
+  const theme_colors = {
+    accent: document.getElementById("colorAccent").value,
+    accentHi: document.getElementById("colorAccentHi").value,
+    background: document.getElementById("colorBg").value,
+    card: document.getElementById("colorCard").value,
+    text: document.getElementById("colorText").value
+  };
+  try {
+    const { error } = await supabase.from("site_settings").upsert({ id: "main", theme_colors });
+    if (error) throw error;
+    showToast("Theme colors saved");
+  } catch (err) {
+    showToast("Could not save theme colors: " + err.message);
+    console.error(err);
+  }
+});
+
+document.getElementById("resetThemeBtn").addEventListener("click", async () => {
+  document.getElementById("colorAccent").value = DEFAULT_THEME.accent;
+  document.getElementById("colorAccentHi").value = DEFAULT_THEME.accentHi;
+  document.getElementById("colorBg").value = DEFAULT_THEME.background;
+  document.getElementById("colorCard").value = DEFAULT_THEME.card;
+  document.getElementById("colorText").value = DEFAULT_THEME.text;
+  try {
+    const { error } = await supabase.from("site_settings").upsert({ id: "main", theme_colors: DEFAULT_THEME });
+    if (error) throw error;
+    showToast("Theme reset to default");
+  } catch (err) {
+    showToast("Could not reset theme: " + err.message);
   }
 });
 
